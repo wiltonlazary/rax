@@ -8,16 +8,15 @@ const colors = require('colors');
  * @type {module.Component}
  */
 module.exports = class Component {
-  constructor(config = {} , options = {}) {
+  constructor(config = {}, options = {}) {
     const { rootContext, context, distPath } = options;
     this.rootContext = rootContext;
     this.context = context;
 
     const { usingComponents = {} } = config;
 
-    for (let [key, value] of usingComponents) {
+    for (let [key, value] of Object.entries(usingComponents)) {
       if (!value.external) {
-        
         const componentDistPath = join(distPath, value.from);
         const componentSourcePath = value.absolutePath;
 
@@ -36,7 +35,7 @@ module.exports = class Component {
         this._writeStyle(stylePath, transformed.style);
 
         new Component(
-          {usingComponents : transformed.usingComponents}, 
+          {usingComponents: transformed.usingComponents},
           { rootContext, context, distPath});
       }
     }

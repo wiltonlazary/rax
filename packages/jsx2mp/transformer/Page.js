@@ -19,12 +19,12 @@ module.exports = class Page {
     const jsxCode = readFileSync(pageJSXPath, 'utf-8');
 
     // { template, jsCode, customComponents,, style }
-    const transformed = transform(jsxCode,{
+    const transformed = transform(jsxCode, {
       filePath: pageJSXPath,
     });
 
     new Component(
-      {usingComponents : transformed.usingComponents}, 
+      {usingComponents: transformed.usingComponents},
       { rootContext, context, distPath: distPagePath });
 
     this.script = transformed.code;

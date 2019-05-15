@@ -62,27 +62,27 @@ module.exports = class App {
     writeJSONSync(join(this.distDirectory, 'package.json'), this.packageConfig);
   }
 
-  _getAllFilePath(sourcePath,distPath){
+  _getAllFilePath(sourcePath, distPath) {
     let files = [];
-    let sourcePathFiles = readdirSync(sourcePath)
-    for(let i = 0, l = sourcePathFiles.length; i < l; i++){
+    let sourcePathFiles = readdirSync(sourcePath);
+    for (let i = 0, l = sourcePathFiles.length; i < l; i++) {
       const item = sourcePathFiles[i];
       const fileItemPath = sourcePath + '/' + item;
-      if (item === 'node_modules' || fileItemPath === distPath || (item.length > 1 && item.substring(0,1) === '.')){
+      if (item === 'node_modules' || fileItemPath === distPath || item.length > 1 && item.substring(0, 1) === '.') {
         continue;
       }
-      if (statSync(fileItemPath).isDirectory()){
-        const childrenFiles = this._getAllFilePath(fileItemPath,distPath);
+      if (statSync(fileItemPath).isDirectory()) {
+        const childrenFiles = this._getAllFilePath(fileItemPath, distPath);
         files = files.concat(childrenFiles);
-      }else{
+      } else {
         files.push(fileItemPath);
       }
     }
     return files;
   }
 
-  watch(sourcePath,distPath) {
-    const files = this._getAllFilePath(sourcePath,distPath);
+  watch(sourcePath, distPath) {
+    const files = this._getAllFilePath(sourcePath, distPath);
     new Watch(files);
   }
 };

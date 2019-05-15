@@ -41,7 +41,7 @@ async function transformJSXToMiniProgram(sourcePath, distPath, enableWatch = fal
 
   if (enableWatch) {
     printLog(colors.green('将监听以下路径的文件变更'), sourcePath);
-    app.watch(sourcePath,distPath);
+    app.watch(sourcePath, distPath);
   }
 
   // const localHelperPath = resolve(__dirname, 'helpers');

@@ -7,19 +7,14 @@ program
   .option('--description [description]', '项目介绍')
   .parse(process.argv);
 
-const args = program.args
-const {description, name} = program
+const args = program.args;
+const {description, name} = program;
 
-const projectName = args[0] || name
+const projectName = args[0] || name;
 
 new Project({
-    description : description,
-    projectName : projectName
-})
-
-
-
-
-
+  description: description,
+  projectName: projectName
+});
 
 
