@@ -15,53 +15,27 @@ module.exports = class Page {
     this.context = context;
     this.distPagePath = distPagePath;
 
-    const pageConfigPath = context + '.json';
-    const pageScriptPath = context + '.js';
     const pageJSXPath = context + '.jsx';
-    const pageStylePath = context + '.acss';
-
     const jsxCode = readFileSync(pageJSXPath, 'utf-8');
-    const scriptCode = readFileSync(pageScriptPath, 'utf-8');
-    const pageConfig = existsSync(pageConfigPath) ? readJSONSync(pageConfigPath) : {};
-    const pageStyle = existsSync(pageStylePath) ? readFileSync(pageStylePath, 'utf-8') : '';
 
     // { template, jsCode, customComponents,, style }
-    const transformed = transform(jsxCode, { filePath: pageJSXPath, rootContext });
-
-    const delegateComponentPath = resolve(distPagePath, 'components');
-    this._delegateComponent = new Component({
-      script: transformed.jsCode,
-      style: transformed.style || '',
-      config: this.generateComponentConfig(transformed.customComponents),
-      template: transformed.template,
-    }, { rootContext, context, distRoot, distPath: delegateComponentPath });
-
-    this.script = scriptCode;
-    this.template = '<page></page>';
-    this.style = pageStyle;
-    this.config = Object.assign({}, pageConfig, {
-      usingComponents: { page: './components/index'},
+    const transformed = transform(jsxCode,{
+      filePath: pageJSXPath,
     });
+
+    new Component(
+      {usingComponents : transformed.usingComponents}, 
+      { rootContext, context, distPath: distPagePath });
+
+    this.script = transformed.code;
+    this.template = transformed.template;
+    this.style = transform.style;
+    this.config = transformed.config;
 
     this._writeFiles();
   }
 
-  generateComponentConfig(customComponents = {}) {
-    const usingComponents = {};
-    Object.keys(customComponents).forEach((name) => {
-      let { tagName, filePath } = customComponents[name];
-      // Remove extension.
-      filePath = filePath.replace(extname(filePath), '') + '/index';
-      usingComponents[tagName] = '/' + relative(this.rootContext, filePath);
-    });
-    return {
-      component: true,
-      usingComponents,
-    };
-  }
-
   _writeFiles() {
-    this._delegateComponent._writeFiles();
     this._writeConfig();
     this._writeStyle();
     this._writeTemplate();

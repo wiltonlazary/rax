@@ -1,6 +1,9 @@
 const { join, resolve } = require('path');
-const { readFileSync, writeFileSync, writeJSONSync, readJSONSync, existsSync } = require('fs-extra');
+const { readFileSync, writeFileSync, writeJSONSync, readJSONSync, existsSync, readdir } = require('fs-extra');
+const { statSync, readdirSync } = require('fs');
 const Page = require('./Page');
+const Component = require('./Component');
+const Watch = require('./Watcher');
 
 const DEP = 'dependencies';
 const DEV_DEP = 'devDependencies';
@@ -37,8 +40,8 @@ module.exports = class App {
       delete packageConfig[DEV_DEP];
     }
 
-    this.dependencyPages = [];
-    const { pages } = config;
+    const pages = config.pages;
+
     for (let i = 0, l = pages.length; i < l; i++) {
       const pageInstance = new Page({
         rootContext: sourcePath,
@@ -47,7 +50,6 @@ module.exports = class App {
         distPagePath: resolve(distDirectory, pages[i], '..'),
         watch,
       });
-      this.dependencyPages.push(pageInstance);
     }
 
     this._writeFiles();
@@ -60,7 +62,27 @@ module.exports = class App {
     writeJSONSync(join(this.distDirectory, 'package.json'), this.packageConfig);
   }
 
-  watch() {
-    // TODO: 实现 watch 功能
+  _getAllFilePath(sourcePath,distPath){
+    let files = [];
+    let sourcePathFiles = readdirSync(sourcePath)
+    for(let i = 0, l = sourcePathFiles.length; i < l; i++){
+      const item = sourcePathFiles[i];
+      const fileItemPath = sourcePath + '/' + item;
+      if (item === 'node_modules' || fileItemPath === distPath || (item.length > 1 && item.substring(0,1) === '.')){
+        continue;
+      }
+      if (statSync(fileItemPath).isDirectory()){
+        const childrenFiles = this._getAllFilePath(fileItemPath,distPath);
+        files = files.concat(childrenFiles);
+      }else{
+        files.push(fileItemPath);
+      }
+    }
+    return files;
+  }
+
+  watch(sourcePath,distPath) {
+    const files = this._getAllFilePath(sourcePath,distPath);
+    new Watch(files);
   }
 };

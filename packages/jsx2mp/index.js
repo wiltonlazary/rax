@@ -41,7 +41,7 @@ async function transformJSXToMiniProgram(sourcePath, distPath, enableWatch = fal
 
   if (enableWatch) {
     printLog(colors.green('将监听以下路径的文件变更'), sourcePath);
-    app.watch();
+    app.watch(sourcePath,distPath);
   }
 
   // const localHelperPath = resolve(__dirname, 'helpers');
@@ -49,10 +49,10 @@ async function transformJSXToMiniProgram(sourcePath, distPath, enableWatch = fal
   // copySync(localHelperPath, resolve(distPath, '__helpers'));
   // printLog(colors.green('复制 Helpers'), 'dist/helpers');
 
-  const shouldInstallDistNPM = await ask('是否需要自动安装 npm 到构建目录中?', false);
-  if (shouldInstallDistNPM) {
-    invokeNpmInstall(distPath);
-  }
+  // const shouldInstallDistNPM = await ask('是否需要自动安装 npm 到构建目录中?', false);
+  // if (shouldInstallDistNPM) {
+  //   invokeNpmInstall(distPath);
+  // }
 }
 
 function invokeNpmInstall(path) {
