@@ -21,6 +21,7 @@ module.exports = class Page {
     // { template, code, customComponents, config, style }
     const transformed = compiler(jsxCode, Object.assign({}, compiler.baseOptions, {
       filePath: pageJSXPath,
+      type: 'page',
     }));
 
     new Component(
@@ -54,7 +55,6 @@ module.exports = class Page {
   _writeScript() {
     this._writeFile(resolve(this.distPagePath, 'index.js'), this.script);
   }
-
 
   /**
    * Write file and ensure folder exists.
