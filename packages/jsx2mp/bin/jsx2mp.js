@@ -9,5 +9,4 @@ program
   .usage('<command> [options]')
   .command('start', 'Start a dev watch mode (hot-reload) to transform project.')
   .command('build', 'Build project in production mode')
-  .command('init [projectName]', 'Init a project with default templete')
   .parse(process.argv);
