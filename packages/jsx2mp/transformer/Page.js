@@ -1,6 +1,6 @@
-const { resolve, relative, extname } = require('path');
-const { existsSync, ensureFileSync, readFileSync, readJSONSync, writeFileSync } = require('fs-extra');
-const transform = require('jsx-compiler');
+const { resolve, relative } = require('path');
+const { ensureFileSync, readFileSync, writeFileSync } = require('fs-extra');
+const compiler = require('jsx-compiler');
 const Component = require('./Component');
 const colors = require('colors');
 
@@ -18,10 +18,10 @@ module.exports = class Page {
     const pageJSXPath = context + '.jsx';
     const jsxCode = readFileSync(pageJSXPath, 'utf-8');
 
-    // { template, jsCode, customComponents,, style }
-    const transformed = transform(jsxCode, {
+    // { template, code, customComponents, config, style }
+    const transformed = compiler(jsxCode, Object.assign({}, compiler.baseOptions, {
       filePath: pageJSXPath,
-    });
+    }));
 
     new Component(
       {usingComponents: transformed.usingComponents},
@@ -29,7 +29,7 @@ module.exports = class Page {
 
     this.script = transformed.code;
     this.template = transformed.template;
-    this.style = transform.style;
+    this.style = transformed.style;
     this.config = transformed.config;
 
     this._writeFiles();
