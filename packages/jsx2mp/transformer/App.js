@@ -3,7 +3,6 @@ const { readFileSync, writeFileSync, writeJSONSync, readJSONSync, existsSync, re
 const { statSync, readdirSync } = require('fs');
 const Page = require('./Page');
 const Component = require('./Component');
-const Watch = require('./Watcher');
 
 const DEP = 'dependencies';
 const DEV_DEP = 'devDependencies';
@@ -14,7 +13,7 @@ module.exports = class App {
    * @param transformerOption {Object}
    */
   constructor(sourcePath, transformerOption) {
-    const { watch, appDirectory, distDirectory } = transformerOption;
+    const { appDirectory, distDirectory } = transformerOption;
     this.appDirectory = appDirectory;
     this.distDirectory = distDirectory;
 
@@ -47,8 +46,7 @@ module.exports = class App {
         rootContext: sourcePath,
         context: resolve(sourcePath, pages[i]),
         distRoot: distDirectory,
-        distPagePath: resolve(distDirectory, pages[i], '..'),
-        watch,
+        distPagePath: resolve(distDirectory, pages[i], '..')
       });
     }
 
@@ -60,29 +58,5 @@ module.exports = class App {
     writeFileSync(join(this.distDirectory, 'app.acss'), this.style);
     writeJSONSync(join(this.distDirectory, 'app.json'), this.config);
     writeJSONSync(join(this.distDirectory, 'package.json'), this.packageConfig);
-  }
-
-  _getAllFilePath(sourcePath, distPath) {
-    let files = [];
-    let sourcePathFiles = readdirSync(sourcePath);
-    for (let i = 0, l = sourcePathFiles.length; i < l; i++) {
-      const item = sourcePathFiles[i];
-      const fileItemPath = sourcePath + '/' + item;
-      if (item === 'node_modules' || fileItemPath === distPath || item.length > 1 && item.substring(0, 1) === '.') {
-        continue;
-      }
-      if (statSync(fileItemPath).isDirectory()) {
-        const childrenFiles = this._getAllFilePath(fileItemPath, distPath);
-        files = files.concat(childrenFiles);
-      } else {
-        files.push(fileItemPath);
-      }
-    }
-    return files;
-  }
-
-  watch(sourcePath, distPath) {
-    const files = this._getAllFilePath(sourcePath, distPath);
-    new Watch(files);
   }
 };

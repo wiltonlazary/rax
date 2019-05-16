@@ -1,6 +1,6 @@
 const { ensureFileSync, writeFileSync, readJSONSync, existsSync, readFileSync } = require('fs-extra');
 const { join, resolve, relative } = require('path');
-const transform = require('jsx-compiler');
+const compiler = require('jsx-compiler');
 const colors = require('colors');
 
 /**
@@ -15,14 +15,17 @@ module.exports = class Component {
 
     const { usingComponents = {} } = config;
 
-    for (let [key, value] of Object.entries(usingComponents)) {
+    for (let [key, value] of usingComponents) {
       if (!value.external) {
         const componentDistPath = join(distPath, value.from);
         const componentSourcePath = value.absolutePath;
 
         const sourceJSXPath = componentSourcePath;
         const jsxFileContent = readFileSync(sourceJSXPath, 'utf-8');
-        const transformed = transform(jsxFileContent, { filePath: sourceJSXPath });
+        const transformed = compiler(jsxFileContent,Object.assign({}, compiler.baseOptions, {
+          filePath: sourceJSXPath,
+          type: 'component',
+        }))
 
         const scriptPath = componentDistPath + '.js';
         const templatePath = componentDistPath + '.axml';

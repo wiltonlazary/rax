@@ -10,7 +10,7 @@ const colors = require('colors');
  */
 module.exports = class Page {
   constructor(options) {
-    const { rootContext, context, distRoot, distPagePath, watch } = options;
+    const { rootContext, context, distRoot, distPagePath } = options;
     this.rootContext = rootContext;
     this.context = context;
     this.distPagePath = distPagePath;

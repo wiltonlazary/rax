@@ -6,7 +6,7 @@ const { baseOptions } = require('./options');
  * @param template {String} Template string.
  * @param options {Object} Compiler options.
  */
-function compile(template, options = baseOptions) {
+function compile(template, options) {
   const parsed = parse(template.trim(), options);
   const generated = generate(parsed, options);
   const { ast, imported, exported } = parsed;
