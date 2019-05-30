@@ -1,86 +1,50 @@
-const INSTANCE = '__rax_instance__';
-const CYCLE_MAP = {
-  componentDidMount: 'didMount',
-  componentWillReceiveProps: 'didUpdate',
-  componentWillUnmount: 'didUnmount',
-};
-
-function hasOwn(object, prop) {
-  return Object.hasOwnProperty.call(object, prop);
-}
-
 /**
- * Bridge setState directly to setData. `this` is bound to component instance.
- * @param particialState {Object|Function}
- * @param callback? {Function}
+ * Base Component class definition.
  */
-function setState(particialState, callback) {
-  return this.setData(particialState, callback);
-}
+import Host from './host';
 
-/**
- * Bridge to forceUpdate.
- * @param callback? {Function}
- */
-function forceUpdate(callback) {
-  return setState.call(this, {}, callback);
-}
+export default class Component {
+  constructor(ops) {
+    const { state, props, functionClass } = ops;
+    this.state = {};
+    this.props = {};
+    this.functionClass = functionClass;
+    this.callbacksQueue = [];
+    this.shouldUpdate = false;
 
-const methods = {
-  setState,
-  forceUpdate,
-};
-
-/**
- * Bridge from RaxComponent Klass to MiniApp Component constructor.
- * @param exported {RaxComponent}
- * @param isFunctionComponent {Boolean}
- * @return {Object} MiniApp Component constructor's first arg.
- */
-export function createComponent(exported, isFunctionComponent = false) {
-  if (isFunctionComponent) {
-    const config = {
-      didMount() {
-        this.setData(exported.call(this, this.props, this.data));
-      },
-      methods,
-    };
-    return config;
-  } else {
-    const { prototype: klassPrototype, mixins, defaultProps } = exported;
-
-    /**
-     * Expose config of component.
-     */
-    const config = {
-      mixins,
-      props: defaultProps,
-      data() {
-        const instance = new exported({}, null); // eslint-disable-line
-        config[INSTANCE] = instance;
-        return instance.state;
-      },
-      methods,
-    };
-
-    /**
-     * Bind function class methods into methods or cycles.
-     */
-    const classMethods = Object.getOwnPropertyNames(klassPrototype);
-    for (let i = 0, l = classMethods.length; i < l; i++) {
-      const methodName = classMethods[i];
-      if ('constructor' === methodName) continue;
-
-      if (typeof klassPrototype[methodName] === 'function') {
-        const fn = klassPrototype[methodName];
-        if (hasOwn(CYCLE_MAP, methodName)) {
-          config[CYCLE_MAP[methodName]] = fn;
-        } else {
-          config.methods[methodName] = fn;
-        }
-      }
+    this._methods = {};
+    this._state = {};
+    this._hooks = {};
+    this.hooks = [];
+    this._hookID = 0;
+    this._disable = true;
+  }
+  scopeInit(scope) {
+    this.scope = scope;
+    this._internal = scope;
+  }
+  setState(state, callback) {
+    // TODO: add shouldComponentUpdate before setData
+    this.scope.setData(state, callback);
+  }
+  getHooks() {
+    return this._hooks;
+  }
+  getHookID() {
+    return ++this._hookID;
+  }
+  _update(patialState) {
+    Host.isUpdating = true;
+    this.setState(Object.assign(this._state, patialState), () => {
+      Host.isUpdating = false;
+      Host.current = null;
+      this._hookID = 0;
+    });
+  }
+  forceUpdate(callback) {
+    if (typeof callback === 'function') {
+      this.callbacksQueue.push(callback);
     }
-
-    return config;
+    this.scope.setData(this.state, callback);
   }
 }

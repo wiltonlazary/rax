@@ -35,8 +35,6 @@ const getAllFilePath = function(sourcePath, distPath) {
  * @param file {String} Absolute changed file path.
  */
 const handleFileChanged = function(file, sourcePath, distPath) {
-  removeSync(distPath);
-  mkdirpSync(distPath);
   createApp(sourcePath, distPath);
 };
 

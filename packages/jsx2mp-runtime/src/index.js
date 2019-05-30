@@ -1,10 +1,19 @@
-import { createComponent } from './Component';
-import { useEffect } from './hooks';
+import { createApp, createPage, createComponent } from './bridge';
+import Component from './component';
+import { checkEnv } from './env';
+
+/**
+ * Check the runtime environment is compatible.
+ */
+checkEnv();
 
 export {
-  /* Base Components */
+  createApp,
+  createPage,
   createComponent,
 
-  /* hooks */
-  useEffect,
+  Component,
 };
+
+/* hooks */
+export * from './hooks';
